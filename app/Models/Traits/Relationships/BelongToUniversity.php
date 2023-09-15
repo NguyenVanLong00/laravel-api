@@ -12,6 +12,6 @@ trait BelongToUniversity
      */
     public function university(): BelongsTo
     {
-        return $this->belongsTo(University::class, 'university_id', 'id');
+        return $this->belongsTo(University::class);
     }
 }
