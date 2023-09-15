@@ -8,26 +8,54 @@ services:
     depends_on:
       - db
     volumes:
-      - .:/var/www/html/
+      - type: volume
+        source: bedata
+        target: /var/www/html/
+        volume:
+          nocopy: true
+
+
+  #Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - type: volume
+        source: bedata
+        target: /var/www/
+        volume:
+          nocopy: true
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
 
   # Mysql Database
   db:
     image: mysql
     restart: always
     ports:
-      - "3308:3306"
+      - "3309:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - data:/var/lib/mysql
+      - type: volume
+        source: dbdata
+        target: /var/lib/mysql
+        volume:
+          nocopy: true
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8088:8080
+
 volumes:
-  data:
+  bedata:
+  dbdata:
