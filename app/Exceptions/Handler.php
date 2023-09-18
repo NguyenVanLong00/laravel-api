@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Exceptions\Auth\UserNotExistException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -23,8 +24,13 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
-            //
+        $this->renderable(function (\Exception $e) {
+            return response()->json(
+                data: [
+                    "message" => $e->getMessage()
+                ],
+                status: $e->getCode()
+            );
         });
     }
 }
