@@ -2,9 +2,9 @@
 
 namespace App\Exceptions\Auth;
 
-use Exception;
+use App\Exceptions\AppException;
 
-class WrongPasswordException extends Exception
+class WrongPasswordAppException extends AppException
 {
     public function __construct(string $message = "Wrong password", int $code = 401)
     {

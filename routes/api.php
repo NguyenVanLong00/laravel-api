@@ -17,13 +17,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('api')->prefix('auth')->group(function () {
     Route::post('login', [UserController::class, 'login'])->name('login');
-
+    Route::post('register', [UserController::class, 'register'])->name('register');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::prefix('auth')->group(function () {
-        Route::post('logout', [UserController::class, 'logout'])->name('logout');
+    Route::prefix('auth')->controller(UserController::class)->group(function () {
+        Route::get('roles', 'roles')->name('roles');
+        Route::post('logout', 'logout')->name('logout');
     });
 
 });

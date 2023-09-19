@@ -2,10 +2,10 @@
 
 namespace App\Exceptions\Auth;
 
-use Exception;
+use App\Exceptions\AppException;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
-class UserNotExistException extends Exception
+class UserNotExistAppException extends AppException
 {
     public function __construct(string $message = "User not found", int $code = ResponseAlias::HTTP_NOT_FOUND)
     {

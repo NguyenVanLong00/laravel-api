@@ -3,8 +3,9 @@
 namespace App\Http\Services;
 
 use App\Enums\Token;
-use App\Exceptions\Auth\UserNotExistException;
-use App\Exceptions\Auth\WrongPasswordException;
+use App\Exceptions\Auth\UserExistedException;
+use App\Exceptions\Auth\UserNotExistAppException;
+use App\Exceptions\Auth\WrongPasswordAppException;
 use App\Http\Resources\User\UserCollection;
 use App\Http\Resources\User\UserResource;
 use App\Http\Services\Interfaces\ToResource;
@@ -36,20 +37,45 @@ class UserService extends Service implements ToResource
      * @param string $username
      * @param string $password
      * @return NewAccessToken
-     * @throws UserNotExistException
-     * @throws WrongPasswordException
+     * @throws UserNotExistAppException
+     * @throws WrongPasswordAppException
      */
-    public function login(string $username, string $password) : NewAccessToken
+    public function login(string $username, string $password): NewAccessToken
     {
         $user = User::query()->where('email', $username)->first();
 
         if (!$user) {
-            throw new UserNotExistException();
+            throw new UserNotExistAppException();
         }
 
         if (!Hash::check($password, $user->password)) {
-            throw new WrongPasswordException();
+            throw new WrongPasswordAppException();
         }
+
+        return $user->createToken(Token::ACCESS_TOKEN->value);
+    }
+
+    /**
+     * @param string $name
+     * @param string $username
+     * @param string $password
+     * @return NewAccessToken
+     * @throws UserExistedException
+     */
+    public function register(string $name,string $username, string $password): NewAccessToken
+    {
+        $userExisted = User::query()->where('email', $username)->exists();
+        if ($userExisted){
+            throw new UserExistedException();
+        }
+
+        $user = new User([
+            'name' => $name,
+            'email' => $username,
+            'password' => Hash::make($password)
+        ]);
+
+        $user->save();
 
         return $user->createToken(Token::ACCESS_TOKEN->value);
     }
