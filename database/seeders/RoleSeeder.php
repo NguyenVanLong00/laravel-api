@@ -18,23 +18,14 @@ class RoleSeeder extends Seeder
     {
         foreach (RoleEnum::cases() as $role) {
 
-            $existRole = Role::query()->where('name', $role->name)->exists();
-            if ($existRole) {
-                continue;
-            }
+            $dbRole = Role::query()->firstOrCreate(['name'=> $role->name]);
 
-
-            DB::transaction(function () use ($role) {
-
-                $newRole = new Role(['name' => $role->name]);
-                $newRole->save();
+            DB::transaction(function () use ($role, $dbRole) {
 
                 $permissions = RoleEnum::getPermission($role);
-                $this->createRolePermission($newRole, $permissions);
+                $this->createRolePermission($dbRole, $permissions);
 
             }, 3);
-
-
         }
     }
 

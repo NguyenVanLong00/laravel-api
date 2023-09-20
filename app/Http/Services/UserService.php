@@ -11,17 +11,13 @@ use App\Http\Resources\User\UserResource;
 use App\Http\Services\Interfaces\ToResource;
 use App\Http\Services\Interfaces\Traits\Resource;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\NewAccessToken;
 
 class UserService extends Service implements ToResource
 {
     use Resource;
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     public function resource(): string
     {
@@ -62,10 +58,10 @@ class UserService extends Service implements ToResource
      * @return NewAccessToken
      * @throws UserExistedException
      */
-    public function register(string $name,string $username, string $password): NewAccessToken
+    public function register(string $name, string $username, string $password): NewAccessToken
     {
         $userExisted = User::query()->where('email', $username)->exists();
-        if ($userExisted){
+        if ($userExisted) {
             throw new UserExistedException();
         }
 
@@ -78,5 +74,35 @@ class UserService extends Service implements ToResource
         $user->save();
 
         return $user->createToken(Token::ACCESS_TOKEN->value);
+    }
+
+    /**
+     * @param string $name
+     * @param string $username
+     * @param string $password
+     * @param string $role
+     * @return User
+     */
+    public function create(string $name, string $username, string $password, int $role): User
+    {
+        $user = new User([
+            'name' => $name,
+            'email' => $username,
+            'password' => Hash::make($password)
+        ]);
+
+        DB::transaction(function () use ($user, $role) {
+            $user->save();
+            $user->roles()->attach($role);
+        });
+
+        return $user;
+    }
+
+    public function users(array $query)
+    {
+        return User::query()
+            ->filter($query)
+            ->paginate();
     }
 }

@@ -25,9 +25,7 @@ enum Role
      */
     public static function adminPermissions(): array
     {
-        return [
-            Permission::CREATE_USER
-        ];
+        return Permission::cases();
     }
 
     /**
